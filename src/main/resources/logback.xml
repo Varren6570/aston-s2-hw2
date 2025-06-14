@@ -1,0 +1,41 @@
+<configuration>
+
+    <!--
+        Appender STDOUT — вывод логов в консоль (стандартный вывод).
+        Здесь задаём формат вывода с датой, временем, потоком,
+        уровнем лога, именем логгера и самим сообщением.
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Логгер для отображения SQL-запросов, которые Hibernate генерирует.
+        Уровень DEBUG — показывать запросы.
+        additivity="false" — чтобы эти логи не дублировались в root-логгер.
+    -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!--
+        Логгер для параметров SQL-запросов, которые Hibernate подставляет в PreparedStatement.
+        Уровень TRACE — очень подробный, включает значения параметров.
+        Обычно включают только при глубокой отладке, т.к. много сообщений.
+    -->
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!--
+        Корневой (root) логгер для всего остального.
+        Уровень INFO — показывать информационные сообщения и выше (WARN, ERROR).
+        Логи из других логгеров, не описанных явно выше, попадут сюда.
+    -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
