@@ -24,6 +24,10 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public void save(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не должен быть null");
+        }
+
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
@@ -76,6 +80,9 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public void update(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не должен быть null");
+        }
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
@@ -97,6 +104,9 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public void delete(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не должен быть null");
+        }
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();

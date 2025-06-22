@@ -13,40 +13,104 @@
         <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
+        <!-- Lombok: Автоматически генерирует геттеры/сеттеры, toString(), equals() и др., сокращая шаблонный код -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.38</version>
         </dependency>
+
+        <!-- Hibernate Core: Основной ORM-фреймворк для работы с базой данных через сущности -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>7.0.2.Final</version>
         </dependency>
+
+        <!-- JDBC-драйвер PostgreSQL: Позволяет Hibernate (или вручную) подключаться к PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.7</version>
         </dependency>
+
+        <!-- SLF4J API: Абстракция для логирования, используется в связке с Logback -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>2.0.17</version>
         </dependency>
+
+        <!-- Logback: Конкретная реализация логирования, совместимая со SLF4J -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.18</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- JUnit Jupiter Engine: Движок для выполнения модульных тестов с использованием JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.13.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito Core: Фреймворк для создания мок-объектов при тестировании -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.18.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito + JUnit Jupiter: Интеграция Mockito с JUnit 5 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.18.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers: Фреймворк для запуска изолированных контейнеров Docker в тестах -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.21.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Модуль Testcontainers для интеграции с JUnit 5 -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.21.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers + PostgreSQL: Автоматический запуск PostgreSQL-контейнера в тестах -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.21.1</version>
+            <scope>test</scope>
+        </dependency>
+
+
+
     </dependencies>
+
     <build>
         <plugins>
+            <!-- Плагин компиляции Maven -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!-- Указание аннотационного процессора для Lombok -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -56,6 +120,7 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

@@ -1,27 +1,29 @@
-import dao.UserDao;
 import dao.UserDaoImpl;
-import lombok.extern.slf4j.Slf4j;
 import model.User;
+import service.UserService;
+import service.UserServiceImpl;
+import util.HibernateUtil;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Scanner;
 
-
-/**
- * Простое консольное приложение для CRUD-операций над сущностью User.
- * Операции производятся с помощью выбора номера желаемой опции в консоли.
- * Настройка Hibernate, произ ведена через hibernate.properties.
- * Логирование - Slf4j + Logback
- */
-@Slf4j
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final UserDao userDao = new UserDaoImpl();
+    private static final UserService userService = new UserServiceImpl(new UserDaoImpl());
 
     public static void main(String[] args) {
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
+        properties.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/userdb");
+        properties.setProperty("hibernate.connection.username", "postgres");
+        properties.setProperty("hibernate.connection.password", "228359");
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+
+        HibernateUtil.init(properties);
+
         while (true) {
             System.out.println("\n--- Меню ---");
             System.out.println("1. Создать пользователя");
@@ -32,8 +34,7 @@ public class Main {
             System.out.println("0. Выход");
             System.out.print("Выбор: ");
 
-            String choice = scanner.nextLine();
-            switch (choice) {
+            switch (scanner.nextLine()) {
                 case "1" -> createUser();
                 case "2" -> findUserById();
                 case "3" -> updateUser();
@@ -48,9 +49,6 @@ public class Main {
         }
     }
 
-    /**
-     * Создаёт нового пользователя на основе введённых данных.
-     */
     private static void createUser() {
         System.out.print("Имя: ");
         String name = scanner.nextLine();
@@ -61,46 +59,31 @@ public class Main {
         System.out.print("Возраст: ");
         int age = Integer.parseInt(scanner.nextLine());
 
-        User user = User.builder()
-                .name(name)
-                .email(email)
-                .age(age)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        userDao.save(user);
-        System.out.println("Пользователь создан: " + user);
+        try {
+            userService.createUser(name, email, age);
+            System.out.println("Пользователь создан.");
+        } catch (Exception e) {
+            System.out.println("Ошибка при создании пользователя: " + e.getMessage());
+        }
     }
 
-    /**
-     * Ищет пользователя по ID и выводит его в консоль.
-     */
     private static void findUserById() {
         System.out.print("ID: ");
         Long id = Long.parseLong(scanner.nextLine());
 
-
-        Optional<User> user = Optional.ofNullable(userDao.findById(id));
-        user.ifPresentOrElse(
-                u -> System.out.println("Найден: " + u),
-                () -> System.out.println("Пользователь не найден.")
-        );
-
-
+        try {
+            User user = userService.getUserById(id);
+            System.out.println("Найден: " + user);
+        } catch (NoSuchElementException e) {
+            System.out.println("Пользователь не найден.");
+        } catch (Exception e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
     }
 
-    /**
-     * Обновляет пользователя по ID.
-     */
     private static void updateUser() {
         System.out.print("ID пользователя для обновления: ");
         Long id = Long.parseLong(scanner.nextLine());
-
-        Optional<User> optionalUser = Optional.ofNullable(userDao.findById(id));
-        if (optionalUser.isEmpty()) {
-            System.out.println("Пользователь не найден.");
-            return;
-        }
 
         System.out.print("Новое имя: ");
         String name = scanner.nextLine();
@@ -111,36 +94,32 @@ public class Main {
         System.out.print("Новый возраст: ");
         int age = Integer.parseInt(scanner.nextLine());
 
-        User user = optionalUser.get();
-        user.setName(name);
-        user.setEmail(email);
-        user.setAge(age);
-
-        userDao.update(user);
-        System.out.println("Пользователь обновлён: " + user);
+        try {
+            userService.updateUser(id, name, email, age);
+            System.out.println("Пользователь обновлён.");
+        } catch (NoSuchElementException e) {
+            System.out.println("Пользователь не найден.");
+        } catch (Exception e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
     }
 
-    /**
-     * Удаляет пользователя по ID.
-     */
     private static void deleteUser() {
         System.out.print("ID пользователя для удаления: ");
         Long id = Long.parseLong(scanner.nextLine());
 
         try {
-            userDao.delete(userDao.findById(id));
-            System.out.println("Пользователь удалён (если существовал).");
+            userService.deleteUserById(id);
+            System.out.println("Пользователь удалён.");
+        } catch (NoSuchElementException e) {
+            System.out.println("Пользователь не найден.");
         } catch (Exception e) {
-            System.out.println("Неверный ID");
+            System.out.println("Ошибка: " + e.getMessage());
         }
-
     }
 
-    /**
-     * Выводит всех пользователей в консоль.
-     */
     private static void listUsers() {
-        List<User> users = userDao.findAll();
+        List<User> users = userService.getAllUsers();
         if (users.isEmpty()) {
             System.out.println("Пользователей нет.");
         } else {

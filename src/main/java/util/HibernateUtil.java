@@ -7,6 +7,8 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import java.util.Properties;
+
 /**
  * Класс для настройки и управления {@link SessionFactory} — основным компонентом Hibernate,
  * отвечающим за создание сессий (соединений с базой данных).
@@ -25,16 +27,26 @@ import org.hibernate.service.ServiceRegistry;
 @Slf4j
 public class HibernateUtil {
 
-    /**
-     * Единственный экземпляр {@link SessionFactory} на всё приложение.
-     * Инициализируется при загрузке класса.
-     */
     @Getter
-    private static final SessionFactory sessionFactory;
+    private static SessionFactory sessionFactory;
 
-    static {
+    /**
+     * Явная инициализация Hibernate с заданными настройками.
+     * Может быть вызвана из main-класса или из теста.
+     *
+     * @param settings Hibernate-настройки (URL, логин, пароль, диалект и т.д.)
+     */
+    public static void init(Properties settings) {
+        if (sessionFactory != null) {
+            log.warn("SessionFactory уже инициализирована. Повторная инициализация невозможна.");
+            return;
+        }
+
         try {
             Configuration configuration = new Configuration();
+            configuration.setProperties(settings);
+
+            // Регистрируем entity-классы
             configuration.addAnnotatedClass(model.User.class);
 
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
@@ -42,10 +54,21 @@ public class HibernateUtil {
                     .build();
 
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-            log.info("Hibernate SessionFactory успешно создан.");
+            log.info("Hibernate SessionFactory успешно инициализирована вручную.");
+
         } catch (Throwable ex) {
             log.error("Инициализация SessionFactory провалена.", ex);
             throw new ExceptionInInitializerError(ex);
+        }
+    }
+    /**
+     * Закрывает SessionFactory и освобождает ресурсы.
+     */
+    public static void shutdown() {
+        if (sessionFactory != null) {
+            sessionFactory.close();
+            sessionFactory = null;
+            log.info("SessionFactory закрыта.");
         }
     }
 }
